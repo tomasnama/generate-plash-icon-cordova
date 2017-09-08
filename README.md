@@ -19,6 +19,9 @@ npm install
 ## Configuration
 
 Copy icon.png, splash.png and the configuration file cordova config.xml in my-directory.
+Icon size 1024 x 1024 px.
+Splash size 2732 x 2732 px.
+
 
 
 ## Run with npm
