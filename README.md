@@ -16,19 +16,19 @@ cd my-directory
 npm install
 
 ```
-##Configuration
+## Configuration
 
 Copy icon.png, splash.png and the configuration file cordova config.xml in my-directory.
 
 
-## Run with NPM
+## Run with npm
 ```shell
 
 npm start
 
 ```
 
-## Run Nodejs
+## Run with nodejs
 ```shell	
 
 node generate
