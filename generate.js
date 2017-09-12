@@ -93,9 +93,11 @@ var sizes = {
     }
 }
 
-const PATH_CONFIG_XML   = 'config.xml';
-const PATH_ICON         = 'icon.png';
-const PATH_SPLASH       = 'splash.png';
+const PATH_CONFIG_XML = 'config.xml';
+const PATH_ICON = 'icon.png';
+const PATH_SPLASH = 'splash.png';
+const TYPE_ICON = 'icon';
+const TYPE_SPLASH = 'splash';
 
 
 fs.readFile(PATH_CONFIG_XML, 'utf8', function (err, data) {
@@ -104,44 +106,76 @@ fs.readFile(PATH_CONFIG_XML, 'utf8', function (err, data) {
     } else {
         var doc = new DOMParser().parseFromString(data);
         /* Process icons */
-        let elements = doc.getElementsByTagName("icon");
-        for (i = 0; i < elements.length; i++) {
-            let element = elements[i];
-            if (element.hasAttribute('src')) {
-                let density = element.getAttribute('density');
-                if (density) {
-                    if (sizes[density]) {
-                        let width = sizes[density]['width'];
-                        let height = sizes[density]['height'];
-                        processImage(element.getAttribute('src'), width, height);
+        let elements = doc.getElementsByTagName(TYPE_ICON);
+        processElements(elements, TYPE_ICON);
+
+        /* Process splash */
+        elements = doc.getElementsByTagName(TYPE_SPLASH);
+        processElements(elements, TYPE_SPLASH);
+    }
+});
+
+
+function processElements(elements, type) {
+    for (i = 0; i < elements.length; i++) {
+        let element = elements[i];
+        if (element.hasAttribute('src')) {
+            let density = element.getAttribute('density');
+            if (density) {
+                if (sizes[density]) {
+                    let width = sizes[density]['width'];
+                    let height = sizes[density]['height'];
+                    if (type === TYPE_ICON) {
+                        resizeImage(element.getAttribute('src'), width, height);
+                    } else if (type === TYPE_SPLASH) {
+                        scaleImage(element.getAttribute('src'), width, height);
                     }
-                } else if (element.hasAttribute('width') && element.hasAttribute('height')) {
-                    processImage(element.getAttribute('src'), element.getAttribute('width'), parseInt(element.getAttribute('height')));
-                } else if (element.hasAttribute('target')) {
-                    let target = element.getAttribute('target');
-                    if (target) {
-                        if (sizes[target]) {
-                            let width = sizes[target]['width'];
-                            let height = sizes[target]['height'];
-                            processImage(element.getAttribute('src'), width, height);
+                }
+            } else if (element.hasAttribute('width') && element.hasAttribute('height')) {
+                if (type === TYPE_ICON) {
+                    resizeImage(element.getAttribute('src'), element.getAttribute('width'), parseInt(element.getAttribute('height')));
+                } else if (type === TYPE_SPLASH) {
+                    scaleImage(element.getAttribute('src'), element.getAttribute('width'), parseInt(element.getAttribute('height')));
+                }
+            } else if (element.hasAttribute('target')) {
+                let target = element.getAttribute('target');
+                if (target) {
+                    if (sizes[target]) {
+                        let width = sizes[target]['width'];
+                        let height = sizes[target]['height'];
+                        if (type === TYPE_ICON) {
+                            resizeImage(element.getAttribute('src'), width, height);
+                        } else if (type === TYPE_SPLASH) {
+                            scaleImage(element.getAttribute('src'), width, height);
                         }
                     }
                 }
             }
         }
-
-        /* Process splash */
     }
-});
+}
 
 
-function processImage(src, width, height) {
+function resizeImage(src, width, height) {
     let _width = parseInt(width);
     let _height = parseInt(height);
-    Jimp.read(PATH_ICON).then(function (lenna) {
-        lenna.resize(_width, _height)             // resize
-                .quality(100)                   // set JPEG quality
-                .write(src);                    // save
+    Jimp.read(PATH_ICON).then(function (image) {
+        image.resize(_width, _height)             // resize
+                .quality(100)                     // set JPEG quality
+                .write(src);                      // save
+        console.log(src);
+    }).catch(function (err) {
+        console.error(err);
+    });
+}
+
+function scaleImage(src, width, height) {
+    let _width = parseInt(width);
+    let _height = parseInt(height);
+    Jimp.read(PATH_SPLASH).then(function (image) {
+        image.cover(_width, _height, Jimp.HORIZONTAL_ALIGN_CENTER | Jimp.VERTICAL_ALIGN_MIDDLE)     // scale
+                .quality(100)                                                                       // set JPEG quality
+                .write(src);                                                                        // save
         console.log(src);
     }).catch(function (err) {
         console.error(err);
