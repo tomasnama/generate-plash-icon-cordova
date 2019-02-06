@@ -8,7 +8,7 @@
         "client",
         "browser"
     ],
-    "author": "avanttic",
+    "author": "Tomás Navarro",
     "contributors": [],
     "dependencies": {
         "jimp": "^0.2.28",
